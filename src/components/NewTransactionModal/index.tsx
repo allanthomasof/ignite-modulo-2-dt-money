@@ -3,7 +3,8 @@ import { Container, TransactionTypeContainer, RadioBox } from './styles'
 import incomeImg from '../../assets/income.svg'
 import outcomeImg from '../../assets/outcome.svg'
 import closeImg from '../../assets/close.svg'
-import { useState } from "react";
+import { FormEvent, useState } from "react";
+import { api } from "../../services/api";
 
 Modal.setAppElement('#root')
 
@@ -14,6 +15,15 @@ interface NewTransactionModalProps {
 
 export function NewTransactionModal ({ isOpen, onRequestClose }: NewTransactionModalProps) {
   const [type, setType] = useState('deposit')
+  const [title, setTitle] = useState('');
+  const [value, setValue] = useState(0);
+  const [category, setCategory] = useState('');
+
+  function handleCreateNewTransaction (event: FormEvent) {
+    event.preventDefault();
+    const data = { title, value, category, type }
+    api.post('/transactions', data)
+  }
 
   return (
     <Modal
@@ -30,14 +40,18 @@ export function NewTransactionModal ({ isOpen, onRequestClose }: NewTransactionM
         <img src={closeImg} alt="Fechar Modal"/>
       </button>
 
-      <Container>
+      <Container onSubmit={handleCreateNewTransaction}>
         <h2>Cadastrar Transação</h2>
 
         <input
+          value={title}
+          onChange={event => setTitle(event.target.value)}
           placeholder="Título"
         />
 
         <input
+          value={value}
+          onChange={event => setValue(Number(event.target.value))}
           placeholder="Valor"
           type="number"
         />
@@ -46,6 +60,7 @@ export function NewTransactionModal ({ isOpen, onRequestClose }: NewTransactionM
           <RadioBox
             type="button"
             isActive={type === 'deposit'}
+            activeColor="green"
             onClick={() => { setType('deposit') }}
           >
             <img src={incomeImg} alt="Entrada"/>
@@ -55,6 +70,7 @@ export function NewTransactionModal ({ isOpen, onRequestClose }: NewTransactionM
           <RadioBox
             type="button"
             isActive={type === 'withdraw'}
+            activeColor="red"
             onClick={() => { setType('withdraw') }}
           >
             <img src={outcomeImg} alt="Saída"/>
@@ -63,6 +79,8 @@ export function NewTransactionModal ({ isOpen, onRequestClose }: NewTransactionM
         </TransactionTypeContainer>
 
         <input
+          value={category}
+          onChange={event => setCategory(event.target.value)}
           placeholder="Categoria"
         />
 
